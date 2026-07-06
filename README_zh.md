@@ -140,20 +140,110 @@ skillhub list
 - Docker & Docker Compose
 - Make
 
-### 启动开发环境
+### 启动开发环境（分步详解）
+
+`make dev-all` 一键启动全部服务（Postgres + Redis + MinIO + Scanner + 后端 + 前端）。
+如果遇到网络问题导致 Docker 镜像拉取失败，可按以下步骤分步启动：
+
+#### 1. 启动依赖服务（PostgreSQL / Redis / MinIO）
 
 ```bash
-# 克隆仓库
-git clone https://github.com/iflytek/skillhub.git
-cd skillhub
+# 全部依赖（含安全扫描器）
+make dev
 
-# 启动完整的本地开发栈（后端 + 前端 + 依赖）
-make dev-all
-
-# 或者分别启动
-make dev-backend    # 仅后端
-make dev-web        # 仅前端
+# 如果 Scanner 镜像拉取失败（如 Docker Hub 不可用），可单独启动核心依赖：
+docker compose -p skillhub up -d --wait postgres redis minio
 ```
+
+依赖服务就绪后，可通过 `make dev-status` 确认健康状态。
+
+#### 2. 安装前端依赖
+
+```bash
+make web-deps
+```
+
+如果遇到 `ERR_PNPM_LOCKFILE_BREAKING_CHANGE`（pnpm 版本不兼容），请运行：
+
+```bash
+cd web && pnpm install --force
+```
+
+#### 3. 启动后端
+
+```bash
+# 禁用 Scanner 时启动后端（如果 Scanner 未运行）
+mkdir -p .dev
+bash scripts/dev-process.sh start \
+  --pid-file .dev/server.pid \
+  --log-file .dev/server.log \
+  --cwd server -- \
+  /bin/sh -lc 'SKILLHUB_SECURITY_SCANNER_ENABLED=false ./scripts/run-dev-app.sh'
+```
+
+首次启动会执行 Maven 构建并下载依赖，请耐心等待。构建完成后 Spring Boot 将自动启动。
+
+查看后端日志：
+
+```bash
+cat .dev/server.log
+tail -f .dev/server.log    # 实时跟踪
+```
+
+#### 4. 启动前端（Vite HMR）
+
+```bash
+bash scripts/dev-process.sh start \
+  --pid-file .dev/web.pid \
+  --log-file .dev/web.log \
+  --cwd web -- \
+  pnpm exec vite --host 127.0.0.1
+```
+
+Vite 开发服务器支持热模块替换（HMR），修改前端代码后浏览器自动刷新。
+
+#### 5. 验证
+
+```bash
+# 查看所有服务状态
+make dev-status
+
+# 检查后端健康
+curl -s http://localhost:8080/actuator/health
+
+# 访问前端
+curl -s -o /dev/null -w "%{http_code}" http://localhost:3000
+```
+
+#### 访问地址
+
+| 服务 | 地址 |
+|------|------|
+| Web UI | `http://localhost:3000` |
+| 后端 API | `http://localhost:8080` |
+| 安全扫描器 | `http://localhost:8000`（可选） |
+
+#### 停止服务
+
+```bash
+# 停止所有（含依赖容器）
+make dev-all-down
+
+# 仅停止后端和前端进程
+bash scripts/dev-process.sh stop --pid-file .dev/server.pid
+bash scripts/dev-process.sh stop --pid-file .dev/web.pid
+```
+
+#### 开发环境常见问题
+
+| 问题 | 解决 |
+|------|------|
+| Docker Hub 无法访问 | 配置镜像加速器，或跳过 Scanner 启动核心依赖 |
+| pnpm lockfile 不兼容 | `cd web && pnpm install --force` 重建锁文件 |
+| 后端端口 8080 被占用 | `lsof -i :8080` 查找并释放进程 |
+| Maven 依赖下载超时 | 配置阿里云镜像（见下方说明） |
+| 后端修改后热更新 | 运行 `make dev-server-restart` |
+| 前端修改后热更新 | 无需操作 — Vite HMR 自动处理 |
 
 > **国内开发者**：如果 Maven 依赖下载超时，需配置阿里云镜像。详见 [本地开发指南](https://iflytek.github.io/skillhub/quickstart.html#本地开发)。
 
