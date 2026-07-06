@@ -232,6 +232,13 @@ make lint-web           # Frontend lint
 make staging            # Full staging regression + smoke test
 ```
 
+### CI & Build Quirks
+
+- **pnpm version mismatch**: CI workflows (`pr-tests.yml`, `pr-e2e.yml`) pin `pnpm/action-setup@v4` with `version: 9`, but `package.json` specifies `pnpm@10.33.0`. Lockfile format may differ. Run `make generate-api` locally, not via CI `version: 9`.
+- **Node.js versions vary**: 20 (web tests), 21 (scripts), 22 (Docker), 24 (docs build). Use 22+ for local dev to match production.
+- **`make clean` destroys Docker volumes** (`-v` flag): runs `docker compose down -v` which wipes Postgres/Redis/MinIO data. For a safe clean of build artifacts only, run `cd server && ./mvnw clean` instead.
+- **`.dockerignore` exists** for `server/` and `web/` but NOT for `scanner/`.
+
 ### File-Specific Requirements
 
 - **Controllers** (`skillhub-app/controller/`) are transport only: extract auth context,
@@ -463,6 +470,24 @@ Namespace roles: `OWNER`, `ADMIN`, `MEMBER`
 - **`cn()` utility**: `web/src/shared/lib/utils.ts`
 - shadcn/ui is NOT used as a library — only Radix primitives + utility composition
 
+### Non-Standard Patterns (Know Before You Navigate)
+
+- **Frontend bootstrap**: entry is `bootstrap.ts` (not `main.tsx`). It loads `/runtime-config.js`
+  dynamically, THEN imports `./main`. Runtime config is injected by Nginx at container boot
+  (`docker-entrypoint.d/30-runtime-config.sh`), not by Vite build-time env vars.
+- **Scanner has zero Python source in repo**: the entire scanner is `cisco-ai-skill-scanner` from
+  PyPI. Only the Dockerfile and a build-time backport script live here. For scanner logic changes,
+  fix the upstream pip package.
+- **Java initializer ordering**: `@PostConstruct` → `ApplicationRunner` → `ApplicationReadyEvent`.
+  `AbstractStreamConsumer` (Redis stream) starts via `@PostConstruct` before admin account is
+  seeded. Streams may briefly fail before `ApplicationRunner` completes.
+- **Redis Stream consumer**: uses raw Redisson `RStream` API with custom thread pool, not
+  Spring Cloud Stream or `@EnableRedisRepositories`. Stream keys and consumer group names are
+  constructor parameters in `AbstractStreamConsumer`.
+- **Dev stack runs partial-container**: `make dev-all` runs Postgres/Redis/MinIO/scanner in
+  containers, but server and web run natively (outside Docker) for HMR and hot-reload.
+  PID management via `scripts/dev-process.sh`, not Docker Compose.
+
 ## Common Patterns
 
 ### Code Style
@@ -477,6 +502,10 @@ Namespace roles: `OWNER`, `ADMIN`, `MEMBER`
 - Strict mode. No `any` types.
 - Use generated OpenAPI types for all API interactions.
 - Feature-Sliced Design: place code at the lowest appropriate layer.
+- **ESLint**: CI uses `--max-warnings 0` on the lint script — zero warnings tolerated.
+  `@typescript-eslint/no-explicit-any: warn`, `@typescript-eslint/no-unused-vars: warn`
+  with `argsIgnorePattern: '^_'`, `react-refresh/only-export-components: off`.
+  No Prettier or `.editorconfig` — formatting follows implicit conventions.
 
 ### Testing Philosophy
 
