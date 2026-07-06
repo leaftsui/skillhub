@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>前端风格设计要素提取器</title>
+    <style>
+        :root {
+            --bg: #f4f6f8;
+            --card-bg: #ffffff;
+            --text: #2c3e50;
+            --text-secondary: #6c757d;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --border: #e2e8f0;
+            --success: #10b981;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 { font-size: 2rem; margin-bottom: 10px; }
+        p.desc { color: var(--text-secondary); font-size: 0.95rem; }
+
+        .input-section {
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        input[type="text"], textarea {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus, textarea:focus {
+            border-color: var(--primary);
+        }
+
+        textarea {
+            width: 100%;
+            height: 100px;
+            resize: vertical;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        button {
+            padding: 12px 24px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            white-space: nowrap;
+        }
+
+        button:hover { background-color: var(--primary-hover); }
+        button:disabled { background-color: #9ca3af; cursor: not-allowed; }
+
+        .toggle-manual {
+            background: none;
+            color: var(--primary);
+            padding: 0;
+            font-size: 0.9rem;
+            text-decoration: underline;
+        }
+        .toggle-manual:hover { background: none; color: var(--primary-hover); }
+
+        .manual-input { display: none; margin-top: 15px; }
+        .manual-input.active { display: block; }
+
+        .status {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 500;
+            display: none;
+        }
+        .status.loading { display: block; background: #eff6ff; color: #1d4ed8; }
+        .status.error { display: block; background: #fef2f2; color: #b91c1c; }
+        .status.success { display: block; background: #ecfdf5; color: #065f46; }
+
+        .results { display: none; }
+        .results.active { display: block; }
+
+        .card {
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            margin-bottom: 24px;
+        }
+
+        .card h2 {
+            font-size: 1.25rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--bg);
+        }
+
+        /* 颜色调色板 */
+        .color-palette {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 16px;
+        }
+
+        .color-swatch {
+            cursor: pointer;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        .color-swatch:hover { transform: translateY(-4px); }
+
+        .color-box {
+            width: 100%;
+            height: 80px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .color-value {
+            font-size: 0.85rem;
+            font-family: monospace;
+            color: var(--text-secondary);
+            word-break: break-all;
+        }
+
+        /* 列表样式 */
+        .item-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .item-tag {
+            background: var(--bg);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-family: monospace;
+            border: 1px solid var(--border);
+        }
+
+        .empty-msg {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        @media (max-width: 600px) {
+            .input-group { flex-direction: column; }
+            .color-palette { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>🎨 前端风格提取器</h1>
+        <p class="desc">输入网址，自动提取网页的色彩、字体、圆角等设计要素。<br>(注：受限于浏览器跨域策略，主要提取内联样式和 &lt;style&gt; 标签中的 CSS)</p>
+    </header>
+
+    <div class="input-section">
+        <div class="input-group">
+            <input type="text" id="urlInput" placeholder="请输入网址 (例如: https://example.com)">
+            <button id="extractBtn" onclick="handleExtract()">开始提取</button>
+        </div>
+        <button class="toggle-manual" onclick="toggleManual()">代理失败？点击手动粘贴 HTML 源码</button>
+        
+        <div id="manualInput" class="manual-input">
+            <textarea id="htmlInput" placeholder="如果网址抓取失败，请右键网页 -> 查看网页源码 -> 复制全部 HTML 粘贴到这里..."></textarea>
+            <button style="margin-top: 10px;" onclick="handleManualExtract()">解析粘贴的源码</button>
+        </div>
+
+        <div id="status" class="status"></div>
+    </div>
+
+    <div id="results" class="results">
+        <div class="card">
+            <h2>🎨 色彩 (Colors)</h2>
+            <div id="colorPalette" class="color-palette"></div>
+        </div>
+        <div class="card">
+            <h2>🔤 字体家族 (Font Families)</h2>
+            <div id="fontList" class="item-list"></div>
+        </div>
+        <div class="card">
+            <h2>📏 字体大小 (Font Sizes)</h2>
+            <div id="fontSizeList" class="item-list"></div>
+        </div>
+        <div class="card">
+            <h2>⭕ 圆角 (Border Radius)</h2>
+            <div id="radiusList" class="item-list"></div>
+        </div>
+    </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+    // 切换手动输入模式
+    function toggleManual() {
+        const el = document.getElementById('manualInput');
+        el.classList.toggle('active');
+    }
+
+    // 显示状态
+    function showStatus(msg, type) {
+        const status = document.getElementById('status');
+        status.className = `status ${type}`;
+        status.innerText = msg;
+    }
+
+    // 显示 Toast 提示
+    function showToast(msg) {
+        const toast = document.getElementById('toast');
+        toast.innerText = msg;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    // 处理 URL 提取
+    async function handleExtract() {
+        const url = document.getElementById('urlInput').value.trim();
+        if (!url) {
+            showStatus('请输入有效的网址', 'error');
+            return;
+        }
+
+        // 补全 http/https
+        let targetUrl = url;
+        if (!targetUrl.startsWith('http')) {
+            targetUrl = 'https://' + targetUrl;
+        }
+
+        showStatus('正在通过代理获取网页源码，请稍候...', 'loading');
+        document.getElementById('extractBtn').disabled = true;
+
+        try {
+            // 使用公共 CORS 代理
+            // 如果 allorigins 失效，可替换为 'https://corsproxy.io/?url=' + encodeURIComponent(targetUrl)
+            const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(targetUrl);
+            
+            const response = await fetch(proxyUrl);
+            if (!response.ok) throw new Error('网络请求失败');
+            
+            const html = await response.text();
+            if (!html || html.length < 100) throw new Error('获取的内容为空或无效');
+            
+            processHTML(html);
+        } catch (error) {
+            showStatus('抓取失败：' + error.message + '。请尝试使用“手动粘贴 HTML 源码”功能。', 'error');
+        } finally {
+            document.getElementById('extractBtn').disabled = false;
+        }
+    }
+
+    // 处理手动提取
+    function handleManualExtract() {
+        const html = document.getElementById('htmlInput').value;
+        if (!html.trim()) {
+            showStatus('请粘贴 HTML 源码', 'error');
+            return;
+        }
+        processHTML(html);
+    }
+
+    // 核心解析逻辑
+    function processHTML(html) {
+        showStatus('正在解析设计要素...', 'loading');
+
+        // 使用 setTimeout 让 UI 有时间更新
+        setTimeout(() => {
+            try {
+                const styles = extractDesignTokens(html);
+                renderResults(styles);
+                showStatus('提取完成！', 'success');
+                document.getElementById('results').classList.add('active');
+            } catch (e) {
+                showStatus('解析出错：' + e.message, 'error');
+            }
+        }, 100);
+    }
+
+    // 提取设计要素
+    function extractDesignTokens(html) {
+        let cssContent = '';
+
+        // 1. 提取 <style> 标签内的 CSS
+        const styleRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi;
+        let match;
+        while ((match = styleRegex.exec(html)) !== null) {
+            cssContent += match[1] + '\n';
+        }
+
+        // 2. 提取 inline style="..."
+        const inlineRegex = /style="([^"]+)"/gi;
+        while ((match = inlineRegex.exec(html)) !== null) {
+            cssContent += match[1] + '\n';
+        }
+
+        // 过滤掉 CSS 变量 var(...) 的具体值，因为我们无法计算它们
+        // 这里简单处理：保留具体值，忽略 var
+        
+        const tokens = {
+            colors: new Set(),
+            fonts: new Set(),
+            fontSizes: new Set(),
+            radius: new Set()
+        };
+
+        // 提取颜色 (HEX, RGB, RGBA, HSL, HSLA)
+        const colorRegexes = [
+            /#([0-9a-fA-F]{3,8})\b/g,
+            /rgba?\(\s*\d+\s*,\s*\d+\s*,\s*\d+(?:\s*,\s*(?:0|1|0?\.\d+))?\s*\)/g,
+            /hsla?\(\s*\d+\s*,\s*\d+%\s*,\s*\d+%(?:\s*,\s*(?:0|1|0?\.\d+))?\s*\)/g
+        ];
+
+        colorRegexes.forEach(regex => {
+            let m;
+            while ((m = regex.exec(cssContent)) !== null) {
+                let val = m[0].toLowerCase();
+                // 过滤无效或无意义的颜色
+                if (!val.includes('var(') && val !== '#000' && val !== '#fff') { 
+                    tokens.colors.add(val);
+                }
+            }
+        });
+
+        // 提取字体家族
+        const fontRegex = /font-family:\s*([^;}\n]+)/g;
+        let m;
+        while ((m = fontRegex.exec(cssContent)) !== null) {
+            let font = m[1].trim().replace(/['"]/g, '').split(',')[0].trim(); // 取第一个字体
+            if (font && !font.includes('var(')) tokens.fonts.add(font);
+        }
+
+        // 提取字体大小
+        const sizeRegex = /font-size:\s*([^;}\n]+)/g;
+        while ((m = sizeRegex.exec(cssContent)) !== null) {
+            let size = m[1].trim();
+            if (size && !size.includes('var(')) tokens.fontSizes.add(size);
+        }
+
+        // 提取圆角
+        const radiusRegex = /border-radius:\s*([^;}\n]+)/g;
+        while ((m = radiusRegex.exec(cssContent)) !== null) {
+            let r = m[1].trim();
+            if (r && !r.includes('var(')) tokens.radius.add(r);
+        }
+
+        return {
+            colors: Array.from(tokens.colors).slice(0, 40), // 限制最多显示40种颜色
+            fonts: Array.from(tokens.fonts),
+            fontSizes: Array.from(tokens.fontSizes),
+            radius: Array.from(tokens.radius)
+        };
+    }
+
+    // 渲染结果
+    function renderResults(tokens) {
+        // 渲染颜色
+        const colorPalette = document.getElementById('colorPalette');
+        colorPalette.innerHTML = '';
+        if (tokens.colors.length === 0) {
+            colorPalette.innerHTML = '<p class="empty-msg">未提取到明显的内联色彩定义</p>';
+        } else {
+            tokens.colors.forEach(color => {
+                const swatch = document.createElement('div');
+                swatch.className = 'color-swatch';
+                swatch.onclick = () => {
+                    navigator.clipboard.writeText(color);
+                    showToast(`已复制: ${color}`);
+                };
+                
+                // 处理 3位 hex 转 6位 以便预览
+                let previewColor = color;
+                if (/^#[0-9a-f]{3}$/i.test(color)) {
+                    previewColor = '#' + color[1]+color[1] + color[2]+color[2] + color[3]+color[3];
+                }
+
+                swatch.innerHTML = `
+                    <div class="color-box" style="background-color: ${previewColor}"></div>
+                    <div class="color-value">${color}</div>
+                `;
+                colorPalette.appendChild(swatch);
+            });
+        }
+
+        // 渲染列表
+        renderList('fontList', tokens.fonts, '未提取到字体定义');
+        renderList('fontSizeList', tokens.fontSizes, '未提取到字号定义');
+        renderList('radiusList', tokens.radius, '未提取到圆角定义');
+    }
+
+    function renderList(elementId, items, emptyMsg) {
+        const el = document.getElementById(elementId);
+        el.innerHTML = '';
+        if (items.length === 0) {
+            el.innerHTML = `<p class="empty-msg">${emptyMsg}</p>`;
+        } else {
+            items.forEach(item => {
+                const tag = document.createElement('div');
+                tag.className = 'item-tag';
+                tag.innerText = item;
+                tag.onclick = () => {
+                    navigator.clipboard.writeText(item);
+                    showToast(`已复制: ${item}`);
+                };
+                tag.style.cursor = 'pointer';
+                el.appendChild(tag);
+            });
+        }
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,2145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>技能超市 - Agent Skills Market</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1a56db;
+            --primary-light: #3b82f6;
+            --primary-dark: #1e40af;
+            --secondary: #0ea5e9;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+            --radius: 8px;
+            --radius-lg: 12px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: var(--gray-50);
+            color: var(--gray-800);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 50%, var(--secondary) 100%);
+            color: white;
+            padding: 0 24px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: var(--shadow-md);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 4px;
+            margin-left: 40px;
+        }
+
+        .header-nav-item {
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            color: rgba(255,255,255,0.8);
+        }
+
+        .header-nav-item:hover {
+            background: rgba(255,255,255,0.15);
+            color: white;
+        }
+
+        .header-nav-item.active {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            font-weight: 500;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .notification-badge {
+            position: relative;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .notification-badge::after {
+            content: '3';
+            position: absolute;
+            top: -4px;
+            right: -6px;
+            background: var(--danger);
+            color: white;
+            font-size: 10px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Main Layout */
+        .main-container {
+            margin-top: 60px;
+            min-height: calc(100vh - 60px);
+        }
+
+        /* Page sections */
+        .page-section {
+            display: none;
+            padding: 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .page-section.active {
+            display: block;
+        }
+
+        /* Skill Market Page */
+        .market-hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: var(--radius-lg);
+            padding: 40px;
+            color: white;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .market-hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 400px;
+            height: 400px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+        }
+
+        .market-hero h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .market-hero p {
+            opacity: 0.9;
+            font-size: 15px;
+            margin-bottom: 20px;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 8px;
+            max-width: 600px;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 14px;
+            outline: none;
+            box-shadow: var(--shadow);
+        }
+
+        .search-bar button {
+            padding: 12px 24px;
+            background: white;
+            color: var(--primary);
+            border: none;
+            border-radius: var(--radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .search-bar button:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Stats Row */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+
+        .stat-icon.blue { background: #dbeafe; }
+        .stat-icon.green { background: #d1fae5; }
+        .stat-icon.purple { background: #ede9fe; }
+        .stat-icon.orange { background: #ffedd5; }
+
+        .stat-info h3 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--gray-800);
+        }
+
+        .stat-info p {
+            font-size: 13px;
+            color: var(--gray-500);
+        }
+
+        /* Category Tags */
+        .category-section {
+            margin-bottom: 24px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--gray-800);
+        }
+
+        .section-link {
+            font-size: 13px;
+            color: var(--primary);
+            cursor: pointer;
+        }
+
+        .category-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .category-tag {
+            padding: 6px 16px;
+            background: white;
+            border: 1px solid var(--gray-200);
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--gray-600);
+        }
+
+        .category-tag:hover, .category-tag.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Skill Cards Grid */
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .skill-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid var(--gray-100);
+            position: relative;
+        }
+
+        .skill-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-light);
+        }
+
+        .skill-card-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .skill-card-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .skill-card-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 2px;
+        }
+
+        .skill-card-author {
+            font-size: 12px;
+            color: var(--gray-400);
+        }
+
+        .skill-card-desc {
+            font-size: 13px;
+            color: var(--gray-500);
+            margin-bottom: 12px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .skill-card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .skill-tag {
+            padding: 2px 8px;
+            background: var(--gray-100);
+            border-radius: 4px;
+            font-size: 11px;
+            color: var(--gray-600);
+        }
+
+        .skill-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 12px;
+            border-top: 1px solid var(--gray-100);
+        }
+
+        .skill-stats {
+            display: flex;
+            gap: 12px;
+            font-size: 12px;
+            color: var(--gray-400);
+        }
+
+        .skill-stats span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .install-btn {
+            padding: 6px 14px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .install-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .install-btn.installed {
+            background: var(--gray-200);
+            color: var(--gray-500);
+        }
+
+        /* Skill Detail Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: white;
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            z-index: 1;
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: var(--gray-100);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: var(--gray-200);
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .detail-section {
+            margin-bottom: 24px;
+        }
+
+        .detail-section h3 {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .detail-meta {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .detail-meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .detail-meta-item label {
+            font-size: 12px;
+            color: var(--gray-400);
+        }
+
+        .detail-meta-item span {
+            font-size: 14px;
+            color: var(--gray-700);
+        }
+
+        .prompt-block {
+            background: var(--gray-800);
+            color: #e5e7eb;
+            padding: 16px;
+            border-radius: var(--radius);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .version-timeline {
+            border-left: 2px solid var(--gray-200);
+            padding-left: 20px;
+            margin-left: 8px;
+        }
+
+        .version-item {
+            position: relative;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .version-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .version-item::before {
+            content: '';
+            position: absolute;
+            left: -25px;
+            top: 4px;
+            width: 10px;
+            height: 10px;
+            background: var(--primary);
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 0 2px var(--primary);
+        }
+
+        .version-item .version-num {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 13px;
+        }
+
+        .version-item .version-date {
+            font-size: 12px;
+            color: var(--gray-400);
+            margin-left: 8px;
+        }
+
+        .version-item .version-desc {
+            font-size: 13px;
+            color: var(--gray-600);
+            margin-top: 4px;
+        }
+
+        /* Create Skill Page */
+        .create-form {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            box-shadow: var(--shadow);
+            max-width: 800px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--gray-700);
+            margin-bottom: 6px;
+        }
+
+        .form-group label .required {
+            color: var(--danger);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius);
+            font-size: 14px;
+            transition: all 0.2s;
+            outline: none;
+        }
+
+        .form-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.1);
+        }
+
+        .form-textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius);
+            font-size: 14px;
+            min-height: 120px;
+            resize: vertical;
+            outline: none;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .form-textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.1);
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius);
+            font-size: 14px;
+            outline: none;
+            background: white;
+            cursor: pointer;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            padding-top: 20px;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: var(--radius);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--gray-100);
+            color: var(--gray-700);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-200);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        /* My Skills Page */
+        .my-skills-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .tab-bar {
+            display: flex;
+            gap: 4px;
+            background: var(--gray-100);
+            padding: 4px;
+            border-radius: var(--radius);
+        }
+
+        .tab-item {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--gray-600);
+        }
+
+        .tab-item.active {
+            background: white;
+            color: var(--gray-800);
+            font-weight: 500;
+            box-shadow: var(--shadow);
+        }
+
+        /* Skill Lab Page */
+        .lab-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .lab-panel {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .lab-panel h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .lab-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding: 12px;
+            border-radius: var(--radius);
+            background: var(--gray-50);
+            border: 1px solid var(--gray-200);
+        }
+
+        .lab-step-num {
+            width: 28px;
+            height: 28px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .lab-step-content h4 {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .lab-step-content p {
+            font-size: 12px;
+            color: var(--gray-500);
+        }
+
+        .lab-output {
+            background: var(--gray-800);
+            color: #e5e7eb;
+            border-radius: var(--radius);
+            padding: 16px;
+            font-size: 13px;
+            line-height: 1.8;
+            min-height: 200px;
+        }
+
+        .lab-output .typing-cursor {
+            display: inline-block;
+            width: 2px;
+            height: 14px;
+            background: var(--success);
+            animation: blink 1s infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        .score-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .score-bar-track {
+            flex: 1;
+            height: 8px;
+            background: var(--gray-200);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .score-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success), var(--secondary));
+            border-radius: 4px;
+            transition: width 1s ease;
+        }
+
+        .score-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--success);
+        }
+
+        /* Admin Page */
+        .admin-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+        }
+
+        .review-list {
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .review-item {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--gray-100);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .review-item:hover {
+            background: var(--gray-50);
+        }
+
+        .review-item-info h4 {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .review-item-info p {
+            font-size: 12px;
+            color: var(--gray-400);
+        }
+
+        .review-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .review-btn {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .review-btn.approve {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .review-btn.reject {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .review-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .chart-placeholder {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .chart-bar-container {
+            margin-top: 16px;
+        }
+
+        .chart-bar-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .chart-bar-label {
+            width: 80px;
+            font-size: 12px;
+            color: var(--gray-600);
+            text-align: right;
+        }
+
+        .chart-bar-track {
+            flex: 1;
+            height: 24px;
+            background: var(--gray-100);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .chart-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            padding-left: 8px;
+            font-size: 11px;
+            color: white;
+            font-weight: 500;
+            transition: width 1.5s ease;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            top: 80px;
+            right: 24px;
+            background: white;
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 3000;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+            border-left: 4px solid var(--success);
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast-icon {
+            font-size: 20px;
+        }
+
+        .toast-content h4 {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .toast-content p {
+            font-size: 12px;
+            color: var(--gray-500);
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .status-badge.published {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-badge.draft {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-badge.reviewing {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .stats-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .skills-grid {
+                grid-template-columns: 1fr;
+            }
+            .lab-container {
+                grid-template-columns: 1fr;
+            }
+            .admin-grid {
+                grid-template-columns: 1fr;
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .header-nav {
+                display: none;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-in {
+            animation: fadeIn 0.3s ease forwards;
+        }
+
+        /* Knowledge Reference */
+        .knowledge-ref {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: var(--radius);
+            margin-bottom: 8px;
+        }
+
+        .knowledge-ref-icon {
+            font-size: 16px;
+        }
+
+        .knowledge-ref-text {
+            font-size: 13px;
+            color: #0369a1;
+            flex: 1;
+        }
+
+        .knowledge-ref-remove {
+            cursor: pointer;
+            color: var(--gray-400);
+            font-size: 16px;
+        }
+
+        /* Rating Stars */
+        .rating-stars {
+            display: flex;
+            gap: 4px;
+        }
+
+        .rating-star {
+            font-size: 18px;
+            cursor: pointer;
+            color: var(--gray-300);
+            transition: color 0.2s;
+        }
+
+        .rating-star.active {
+            color: #fbbf24;
+        }
+
+        .rating-star:hover {
+            color: #f59e0b;
+        }
+
+        /* Progress Steps */
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 32px;
+            position: relative;
+        }
+
+        .progress-steps::before {
+            content: '';
+            position: absolute;
+            top: 16px;
+            left: 40px;
+            right: 40px;
+            height: 2px;
+            background: var(--gray-200);
+        }
+
+        .progress-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .progress-step-circle {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--gray-200);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--gray-500);
+        }
+
+        .progress-step.active .progress-step-circle {
+            background: var(--primary);
+            color: white;
+        }
+
+        .progress-step.completed .progress-step-circle {
+            background: var(--success);
+            color: white;
+        }
+
+        .progress-step-label {
+            font-size: 12px;
+            color: var(--gray-500);
+        }
+
+        .progress-step.active .progress-step-label {
+            color: var(--primary);
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <div class="logo">
+                <div class="logo-icon">🏪</div>
+                <span>技能超市</span>
+            </div>
+            <nav class="header-nav">
+                <div class="header-nav-item active" onclick="switchPage('market')">技能市场</div>
+                <div class="header-nav-item" onclick="switchPage('myskills')">我的技能</div>
+                <div class="header-nav-item" onclick="switchPage('create')">创建技能</div>
+                <div class="header-nav-item" onclick="switchPage('lab')">技能实验室</div>
+                <div class="header-nav-item" onclick="switchPage('admin')">管理后台</div>
+            </nav>
+        </div>
+        <div class="header-right">
+            <div class="notification-badge">🔔</div>
+            <div class="user-avatar">张</div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Page: Skill Market -->
+        <div class="page-section active" id="page-market">
+            <!-- Hero Section -->
+            <div class="market-hero">
+                <h1>🚀 发现适合你的Agent技能</h1>
+                <p>浏览、安装和使用企业级AI技能，提升工作效率</p>
+                <div class="search-bar">
+                    <input type="text" placeholder="搜索技能名称、标签或描述..." id="searchInput" onkeyup="filterSkills()">
+                    <button onclick="filterSkills()">🔍 搜索</button>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="stat-icon blue">📦</div>
+                    <div class="stat-info">
+                        <h3>128</h3>
+                        <p>技能总数</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green">📥</div>
+                    <div class="stat-info">
+                        <h3>3,842</h3>
+                        <p>总安装量</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon purple">👥</div>
+                    <div class="stat-info">
+                        <h3>56</h3>
+                        <p>贡献者</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon orange">⭐</div>
+                    <div class="stat-info">
+                        <h3>4.6</h3>
+                        <p>平均评分</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categories -->
+            <div class="category-section">
+                <div class="section-header">
+                    <h2 class="section-title">技能分类</h2>
+                    <span class="section-link">查看全部 →</span>
+                </div>
+                <div class="category-tags">
+                    <span class="category-tag active" onclick="filterByCategory(this, 'all')">全部</span>
+                    <span class="category-tag" onclick="filterByCategory(this, 'text')">文本处理</span>
+                    <span class="category-tag" onclick="filterByCategory(this, 'data')">数据分析</span>
+                    <span class="category-tag" onclick="filterByCategory(this, 'code')">代码生成</span>
+                    <span class="category-tag" onclick="filterByCategory(this, 'doc')">文档处理</span>
+                    <span class="category-tag" onclick="filterByCategory(this, 'risk')">风控合规</span>
+                    <span class="category-tag" onclick="filterByCategory(this, 'customer')">客户服务</span>
+                    <span class="category-tag" onclick="filterByCategory(this, 'finance')">金融计算</span>
+                </div>
+            </div>
+
+            <!-- Skills Grid -->
+            <div class="section-header">
+                <h2 class="section-title">热门技能</h2>
+                <span class="section-link">按热度排序 ↓</span>
+            </div>
+            <div class="skills-grid" id="skillsGrid">
+                <!-- Cards will be generated by JS -->
+            </div>
+        </div>
+
+        <!-- Page: My Skills -->
+        <div class="page-section" id="page-myskills">
+            <div class="my-skills-header">
+                <h2 class="section-title">我的技能空间</h2>
+                <div class="tab-bar">
+                    <div class="tab-item active" onclick="switchTab(this, 'installed')">已安装</div>
+                    <div class="tab-item" onclick="switchTab(this, 'created')">我创建的</div>
+                    <div class="tab-item" onclick="switchTab(this, 'favorites')">收藏</div>
+                </div>
+            </div>
+            <div class="skills-grid" id="mySkillsGrid">
+                <!-- Generated by JS -->
+            </div>
+        </div>
+
+        <!-- Page: Create Skill -->
+        <div class="page-section" id="page-create">
+            <h2 class="section-title" style="margin-bottom: 24px;">创建新技能</h2>
+            
+            <!-- Progress Steps -->
+            <div class="progress-steps">
+                <div class="progress-step completed">
+                    <div class="progress-step-circle">✓</div>
+                    <span class="progress-step-label">基本信息</span>
+                </div>
+                <div class="progress-step active">
+                    <div class="progress-step-circle">2</div>
+                    <span class="progress-step-label">技能配置</span>
+                </div>
+                <div class="progress-step">
+                    <div class="progress-step-circle">3</div>
+                    <span class="progress-step-label">测试验证</span>
+                </div>
+                <div class="progress-step">
+                    <div class="progress-step-circle">4</div>
+                    <span class="progress-step-label">提交发布</span>
+                </div>
+            </div>
+
+            <div class="create-form">
+                <div class="form-group">
+                    <label>技能名称 <span class="required">*</span></label>
+                    <input type="text" class="form-input" placeholder="请输入技能名称，如：合同条款审查助手">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>技能分类 <span class="required">*</span></label>
+                        <select class="form-select">
+                            <option>请选择分类</option>
+                            <option>文本处理</option>
+                            <option>数据分析</option>
+                            <option>代码生成</option>
+                            <option>文档处理</option>
+                            <option>风控合规</option>
+                            <option>客户服务</option>
+                            <option>金融计算</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>可见范围</label>
+                        <select class="form-select">
+                            <option>全行可见</option>
+                            <option>部门可见</option>
+                            <option>项目组可见</option>
+                            <option>仅自己可见</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>技能描述 <span class="required">*</span></label>
+                    <textarea class="form-textarea" placeholder="描述该技能的功能、适用场景和预期效果..." style="min-height: 80px;"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Prompt 配置 <span class="required">*</span></label>
+                    <textarea class="form-textarea" style="font-family: monospace; min-height: 160px;" placeholder="输入系统提示词...&#10;&#10;示例：&#10;你是一名专业的银行合同审查助手。请根据以下规则审查合同条款：&#10;1. 检查是否存在不合规条款&#10;2. 标注风险等级&#10;3. 给出修改建议"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>输入参数说明</label>
+                        <textarea class="form-textarea" style="min-height: 80px;" placeholder="描述输入参数格式...&#10;如：contract_text (string) - 合同文本内容"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>输出格式说明</label>
+                        <textarea class="form-textarea" style="min-height: 80px;" placeholder="描述输出格式...&#10;如：JSON格式，包含risk_level, issues, suggestions"></textarea>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>标签</label>
+                    <input type="text" class="form-input" placeholder="输入标签，用逗号分隔，如：合同, 风控, 合规审查">
+                </div>
+                <div class="form-group">
+                    <label>关联知识文档</label>
+                    <div id="knowledgeRefs">
+                        <div class="knowledge-ref">
+                            <span class="knowledge-ref-icon">📄</span>
+                            <span class="knowledge-ref-text">《建设银行合同管理办法（2026版）》</span>
+                            <span class="knowledge-ref-remove" onclick="this.parentElement.remove()">✕</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" style="margin-top: 8px; font-size: 12px;" onclick="addKnowledgeRef()">+ 关联知识文档</button>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-secondary">保存草稿</button>
+                    <button class="btn btn-primary" onclick="showToast('技能创建成功', '已提交审核，预计1个工作日内完成审核')">提交审核</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page: Skill Lab -->
+        <div class="page-section" id="page-lab">
+            <h2 class="section-title" style="margin-bottom: 8px;">🧪 技能实验室</h2>
+            <p style="color: var(--gray-500); margin-bottom: 24px; font-size: 14px;">定义任务目标，AI辅助生成技能初稿，通过迭代优化持续提升技能质量</p>
+
+            <div class="lab-container">
+                <!-- Left: Task Definition -->
+                <div class="lab-panel">
+                    <h3>📋 任务定义</h3>
+                    
+                    <div class="lab-step">
+                        <div class="lab-step-num">1</div>
+                        <div class="lab-step-content">
+                            <h4>任务目标</h4>
+                            <p>描述你希望技能完成的任务</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <textarea class="form-textarea" style="min-height: 60px;" placeholder="例如：自动分析客户投诉工单，提取关键问题并生成处理建议"></textarea>
+                    </div>
+
+                    <div class="lab-step">
+                        <div class="lab-step-num">2</div>
+                        <div class="lab-step-content">
+                            <h4>输入/输出标准</h4>
+                            <p>定义准入准出条件</p>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>输入示例</label>
+                            <textarea class="form-textarea" style="min-height: 60px;" placeholder="客户投诉：信用卡还款后仍收到逾期通知..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>期望输出</label>
+                            <textarea class="form-textarea" style="min-height: 60px;" placeholder="问题分类、紧急程度、处理建议、参考话术..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="lab-step">
+                        <div class="lab-step-num">3</div>
+                        <div class="lab-step-content">
+                            <h4>评分规则</h4>
+                            <p>设置技能质量评估标准</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                            <span class="category-tag active">准确性</span>
+                            <span class="category-tag active">完整性</span>
+                            <span class="category-tag">响应速度</span>
+                            <span class="category-tag active">格式规范</span>
+                            <span class="category-tag">创新性</span>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary" style="width: 100%; margin-top: 16px;" onclick="generateSkill()">
+                        🤖 AI生成技能初稿
+                    </button>
+
+                    <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--gray-200);">
+                        <p style="font-size: 13px; color: var(--gray-500); margin-bottom: 8px;">或从已有技能改造：</p>
+                        <select class="form-select" style="font-size: 13px;">
+                            <option>选择已有技能作为基础...</option>
+                            <option>客户投诉分类助手 v2.1</option>
+                            <option>工单摘要生成器 v1.3</option>
+                            <option>服务话术推荐 v3.0</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Right: Output & Iteration -->
+                <div class="lab-panel">
+                    <h3>🔬 生成结果</h3>
+                    <div class="lab-output" id="labOutput">
+                        <span style="color: var(--gray-400);">点击左侧"AI生成技能初稿"按钮开始...</span>
+                    </div>
+
+                    <div id="labScore" style="display: none;">
+                        <div class="score-bar">
+                            <span style="font-size: 13px; color: var(--gray-600);">质量评分：</span>
+                            <div class="score-bar-track">
+                                <div class="score-bar-fill" id="scoreFill" style="width: 0%;"></div>
+                            </div>
+                            <span class="score-value" id="scoreValue">0</span>
+                        </div>
+                        <div style="margin-top: 16px; display: flex; gap: 8px;">
+                            <button class="btn btn-primary" style="flex: 1;" onclick="iterateSkill()">🔄 迭代优化</button>
+                            <button class="btn btn-success" style="flex: 1;" onclick="showToast('技能已保存', '已保存到我的技能空间')">💾 保存技能</button>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--gray-200);">
+                        <h4 style="font-size: 14px; margin-bottom: 12px;">迭代历史</h4>
+                        <div class="version-timeline" id="iterationHistory">
+                            <div class="version-item">
+                                <span class="version-num">v0.1</span>
+                                <span class="version-date">初始版本</span>
+                                <div class="version-desc">基础框架生成</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page: Admin -->
+        <div class="page-section" id="page-admin">
+            <h2 class="section-title" style="margin-bottom: 24px;">管理后台</h2>
+
+            <div class="admin-grid">
+                <div>
+                    <!-- Review Queue -->
+                    <div class="review-list" style="margin-bottom: 24px;">
+                        <div style="padding: 16px 20px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center;">
+                            <h3 style="font-size: 15px; font-weight: 600;">待审核技能</h3>
+                            <span class="status-badge reviewing">5 待处理</span>
+                        </div>
+                        <div class="review-item">
+                            <div class="review-item-info">
+                                <h4>📝 信贷报告自动生成助手</h4>
+                                <p>提交人：李明 · 风险管理部 · 2小时前</p>
+                            </div>
+                            <div class="review-actions">
+                                <button class="review-btn approve" onclick="approveSkill(this)">✓ 通过</button>
+                                <button class="review-btn reject" onclick="rejectSkill(this)">✕ 驳回</button>
+                            </div>
+                        </div>
+                        <div class="review-item">
+                            <div class="review-item-info">
+                                <h4>📊 客户画像分析技能</h4>
+                                <p>提交人：王芳 · 个人金融部 · 5小时前</p>
+                            </div>
+                            <div class="review-actions">
+                                <button class="review-btn approve" onclick="approveSkill(this)">✓ 通过</button>
+                                <button class="review-btn reject" onclick="rejectSkill(this)">✕ 驳回</button>
+                            </div>
+                        </div>
+                        <div class="review-item">
+                            <div class="review-item-info">
+                                <h4>🔐 反洗钱规则校验技能</h4>
+                                <p>提交人：赵强 · 合规部 · 1天前</p>
+                            </div>
+                            <div class="review-actions">
+                                <button class="review-btn approve" onclick="approveSkill(this)">✓ 通过</button>
+                                <button class="review-btn reject" onclick="rejectSkill(this)">✕ 驳回</button>
+                            </div>
+                        </div>
+                        <div class="review-item">
+                            <div class="review-item-info">
+                                <h4>💬 智能客服话术推荐</h4>
+                                <p>提交人：陈静 · 客服中心 · 1天前</p>
+                            </div>
+                            <div class="review-actions">
+                                <button class="review-btn approve" onclick="approveSkill(this)">✓ 通过</button>
+                                <button class="review-btn reject" onclick="rejectSkill(this)">✕ 驳回</button>
+                            </div>
+                        </div>
+                        <div class="review-item">
+                            <div class="review-item-info">
+                                <h4>📑 会议纪要智能整理</h4>
+                                <p>提交人：刘伟 · 办公室 · 2天前</p>
+                            </div>
+                            <div class="review-actions">
+                                <button class="review-btn approve" onclick="approveSkill(this)">✓ 通过</button>
+                                <button class="review-btn reject" onclick="rejectSkill(this)">✕ 驳回</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Analytics -->
+                    <div class="chart-placeholder">
+                        <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 4px;">技能使用统计（近7天）</h3>
+                        <p style="font-size: 12px; color: var(--gray-400); margin-bottom: 16px;">安装量 Top 10</p>
+                        <div class="chart-bar-container" id="chartBars">
+                            <!-- Generated by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Side Panel -->
+                <div>
+                    <!-- Quick Stats -->
+                    <div class="chart-placeholder" style="margin-bottom: 24px;">
+                        <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 16px;">运营概览</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div style="text-align: center; padding: 12px; background: var(--gray-50); border-radius: 8px;">
+                                <div style="font-size: 24px; font-weight: 700; color: var(--primary);">12</div>
+                                <div style="font-size: 11px; color: var(--gray-500);">本周新增</div>
+                            </div>
+                            <div style="text-align: center; padding: 12px; background: var(--gray-50); border-radius: 8px;">
+                                <div style="font-size: 24px; font-weight: 700; color: var(--success);">847</div>
+                                <div style="font-size: 11px; color: var(--gray-500);">本周调用</div>
+                            </div>
+                            <div style="text-align: center; padding: 12px; background: var(--gray-50); border-radius: 8px;">
+                                <div style="font-size: 24px; font-weight: 700; color: var(--warning);">5</div>
+                                <div style="font-size: 11px; color: var(--gray-500);">待审核</div>
+                            </div>
+                            <div style="text-align: center; padding: 12px; background: var(--gray-50); border-radius: 8px;">
+                                <div style="font-size: 24px; font-weight: 700; color: var(--danger);">2</div>
+                                <div style="font-size: 11px; color: var(--gray-500);">需关注</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="chart-placeholder">
+                        <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 16px;">最近动态</h3>
+                        <div style="font-size: 13px;">
+                            <div style="padding: 8px 0; border-bottom: 1px solid var(--gray-100); display: flex; gap: 8px;">
+                                <span style="color: var(--success);">●</span>
+                                <div>
+                                    <span style="color: var(--gray-700);">张三</span>
+                                    <span style="color: var(--gray-500);"> 安装了 </span>
+                                    <span style="color: var(--primary);">合同审查助手</span>
+                                    <div style="font-size: 11px; color: var(--gray-400);">5分钟前</div>
+                                </div>
+                            </div>
+                            <div style="padding: 8px 0; border-bottom: 1px solid var(--gray-100); display: flex; gap: 8px;">
+                                <span style="color: var(--primary);">●</span>
+                                <div>
+                                    <span style="color: var(--gray-700);">李明</span>
+                                    <span style="color: var(--gray-500);"> 提交了新技能 </span>
+                                    <span style="color: var(--primary);">信贷报告生成</span>
+                                    <div style="font-size: 11px; color: var(--gray-400);">2小时前</div>
+                                </div>
+                            </div>
+                            <div style="padding: 8px 0; border-bottom: 1px solid var(--gray-100); display: flex; gap: 8px;">
+                                <span style="color: var(--warning);">●</span>
+                                <div>
+                                    <span style="color: var(--gray-700);">系统</span>
+                                    <span style="color: var(--gray-500);"> 技能 </span>
+                                    <span style="color: var(--primary);">数据分析v2</span>
+                                    <span style="color: var(--gray-500);"> 版本更新</span>
+                                    <div style="font-size: 11px; color: var(--gray-400);">3小时前</div>
+                                </div>
+                            </div>
+                            <div style="padding: 8px 0; border-bottom: 1px solid var(--gray-100); display: flex; gap: 8px;">
+                                <span style="color: var(--success);">●</span>
+                                <div>
+                                    <span style="color: var(--gray-700);">王芳</span>
+                                    <span style="color: var(--gray-500);"> 评价了 </span>
+                                    <span style="color: var(--primary);">客服话术推荐</span>
+                                    <span style="color: var(--gray-500);"> ⭐⭐⭐⭐⭐</span>
+                                    <div style="font-size: 11px; color: var(--gray-400);">5小时前</div>
+                                </div>
+                            </div>
+                            <div style="padding: 8px 0; display: flex; gap: 8px;">
+                                <span style="color: var(--primary);">●</span>
+                                <div>
+                                    <span style="color: var(--gray-700);">赵强</span>
+                                    <span style="color: var(--gray-500);"> 在实验室创建了 </span>
+                                    <span style="color: var(--primary);">反欺诈检测</span>
+                                    <div style="font-size: 11px; color: var(--gray-400);">1天前</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Skill Detail Modal -->
+    <div class="modal-overlay" id="skillDetailModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div class="skill-card-icon" id="modalIcon" style="width:40px;height:40px;font-size:18px;">📝</div>
+                    <div>
+                        <h2 style="font-size: 18px;" id="modalTitle">技能名称</h2>
+                        <span class="status-badge published" id="modalStatus">已发布</span>
+                    </div>
+                </div>
+                <button class="modal-close" onclick="closeModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="detail-section">
+                    <h3>基本信息</h3>
+                    <div class="detail-meta">
+                        <div class="detail-meta-item">
+                            <label>创建者</label>
+                            <span id="modalAuthor">张三 · 信息技术部</span>
+                        </div>
+                        <div class="detail-meta-item">
+                            <label>版本</label>
+                            <span id="modalVersion">v2.1.0</span>
+                        </div>
+                        <div class="detail-meta-item">
+                            <label>安装量</label>
+                            <span id="modalInstalls">328</span>
+                        </div>
+                        <div class="detail-meta-item">
+                            <label>调用次数</label>
+                            <span id="modalCalls">1,247</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h3>技能描述</h3>
+                    <p style="font-size: 14px; color: var(--gray-600);" id="modalDesc">
+                        该技能用于自动化处理合同条款审查，能够识别不合规条款并给出修改建议。
+                    </p>
+                </div>
+
+                <div class="detail-section">
+                    <h3>Prompt 配置</h3>
+                    <div class="prompt-block" id="modalPrompt">你是一名专业的银行合同审查助手。请根据以下规则审查合同条款：
+1. 检查是否存在不合规条款
+2. 标注风险等级（高/中/低）
+3. 给出具体的修改建议
+4. 引用相关制度文件
+
+输出格式：JSON
+{
+  "risk_level": "high/medium/low",
+  "issues": [...],
+  "suggestions": [...],
+  "references": [...]
+}</div>
+                </div>
+
+                <div class="detail-section">
+                    <h3>关联知识</h3>
+                    <div class="knowledge-ref">
+                        <span class="knowledge-ref-icon">📄</span>
+                        <span class="knowledge-ref-text">《建设银行合同管理办法（2026版）》</span>
+                    </div>
+                    <div class="knowledge-ref">
+                        <span class="knowledge-ref-icon">📄</span>
+                        <span class="knowledge-ref-text">《商业银行合规风险管理指引》</span>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h3>版本记录</h3>
+                    <div class="version-timeline">
+                        <div class="version-item">
+                            <span class="version-num">v2.1.0</span>
+                            <span class="version-date">2026-07-04</span>
+                            <div class="version-desc">优化了风险识别准确率，新增对担保条款的审查</div>
+                        </div>
+                        <div class="version-item">
+                            <span class="version-num">v2.0.0</span>
+                            <span class="version-date">2026-06-20</span>
+                            <div class="version-desc">重构Prompt结构，引入知识引用机制</div>
+                        </div>
+                        <div class="version-item">
+                            <span class="version-num">v1.0.0</span>
+                            <span class="version-date">2026-05-15</span>
+                            <div class="version-desc">初始版本发布</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h3>用户评价</h3>
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                        <div class="rating-stars">
+                            <span class="rating-star active">★</span>
+                            <span class="rating-star active">★</span>
+                            <span class="rating-star active">★</span>
+                            <span class="rating-star active">★</span>
+                            <span class="rating-star">★</span>
+                        </div>
+                        <span style="font-size: 14px; font-weight: 600;">4.2</span>
+                        <span style="font-size: 12px; color: var(--gray-400);">(56条评价)</span>
+                    </div>
+                    <div style="background: var(--gray-50); padding: 12px; border-radius: 8px; margin-bottom: 8px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                            <span style="font-size: 13px; font-weight: 500;">李四</span>
+                            <span style="font-size: 12px; color: var(--gray-400);">2天前</span>
+                        </div>
+                        <p style="font-size: 13px; color: var(--gray-600);">非常好用，大幅提升了合同审查效率！</p>
+                    </div>
+                    <div style="background: var(--gray-50); padding: 12px; border-radius: 8px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                            <span style="font-size: 13px; font-weight: 500;">王五</span>
+                            <span style="font-size: 12px; color: var(--gray-400);">5天前</span>
+                        </div>
+                        <p style="font-size: 13px; color: var(--gray-600);">希望能增加对跨境合同的支持。</p>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 12px; padding-top: 16px; border-top: 1px solid var(--gray-200);">
+                    <button class="btn btn-primary" style="flex: 1;" onclick="installFromModal()">📥 安装技能</button>
+                    <button class="btn btn-secondary" style="flex: 1;" onclick="closeModal()">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <span class="toast-icon">✅</span>
+        <div class="toast-content">
+            <h4 id="toastTitle">操作成功</h4>
+            <p id="toastDesc">描述信息</p>
+        </div>
+    </div>
+
+    <script>
+        // Skill Data
+        const skills = [
+            {
+                id: 1, name: '合同条款审查助手', icon: '📝', color: '#dbeafe',
+                author: '张三 · 信息技术部', desc: '自动识别合同中的不合规条款，标注风险等级并给出修改建议，支持多种合同类型。',
+                tags: ['合同', '风控', '合规'], category: 'risk',
+                installs: 328, calls: 1247, rating: 4.2, status: 'published', version: 'v2.1.0',
+                prompt: '你是一名专业的银行合同审查助手...'
+            },
+            {
+                id: 2, name: '客户投诉分析器', icon: '📊', color: '#d1fae5',
+                author: '李四 · 客服中心', desc: '自动分析客户投诉工单内容，提取关键问题并分类，生成处理建议报告。',
+                tags: ['客服', '分析', 'NLP'], category: 'customer',
+                installs: 256, calls: 892, rating: 4.5, status: 'published', version: 'v1.3.0',
+                prompt: '你是一名客户服务分析专家...'
+            },
+            {
+                id: 3, name: 'SQL查询生成器', icon: '💻', color: '#ede9fe',
+                author: '王五 · 数据管理部', desc: '根据自然语言描述自动生成SQL查询语句，支持建行数据仓库表结构。',
+                tags: ['SQL', '数据', '代码'], category: 'code',
+                installs: 412, calls: 2156, rating: 4.7, status: 'published', version: 'v3.0.1',
+                prompt: '你是一名SQL专家，熟悉建行数据仓库...'
+            },
+            {
+                id: 4, name: '会议纪要整理', icon: '📋', color: '#fef3c7',
+                author: '赵六 · 办公室', desc: '将会议录音转文字后自动提取要点、决议事项和待办任务。',
+                tags: ['会议', '文档', '效率'], category: 'doc',
+                installs: 189, calls: 634, rating: 4.3, status: 'published', version: 'v1.1.0',
+                prompt: '你是一名会议纪要整理助手...'
+            },
+            {
+                id: 5, name: '反洗钱规则校验', icon: '🔐', color: '#fee2e2',
+                author: '钱七 · 合规部', desc: '根据最新反洗钱法规，自动校验交易是否触发可疑交易报告标准。',
+                tags: ['反洗钱', '合规', '风控'], category: 'risk',
+                installs: 167, calls: 523, rating: 4.6, status: 'published', version: 'v2.0.0',
+                prompt: '你是一名反洗钱合规专家...'
+            },
+            {
+                id: 6, name: '理财产品推荐', icon: '💰', color: '#dbeafe',
+                author: '孙八 · 个人金融部', desc: '根据客户风险偏好和资产状况，智能推荐适合的理财产品组合。',
+                tags: ['理财', '推荐', '客户'], category: 'finance',
+                installs: 298, calls: 1089, rating: 4.4, status: 'published', version: 'v1.5.0',
+                prompt: '你是一名理财规划顾问...'
+            },
+            {
+                id: 7, name: '报表数据解读', icon: '📈', color: '#d1fae5',
+                author: '周九 · 财务会计部', desc: '自动解读财务报表数据，生成可视化分析报告和管理层摘要。',
+                tags: ['报表', '分析', '财务'], category: 'data',
+                installs: 234, calls: 876, rating: 4.1, status: 'published', version: 'v1.2.0',
+                prompt: '你是一名财务分析专家...'
+            },
+            {
+                id: 8, name: '制度文件问答', icon: '📚', color: '#ede9fe',
+                author: '吴十 · 合规部', desc: '基于建行内部制度文件库，回答员工关于规章制度、操作流程的问题。',
+                tags: ['制度', '问答', '知识库'], category: 'doc',
+                installs: 356, calls: 1567, rating: 4.8, status: 'published', version: 'v2.3.0',
+                prompt: '你是建行制度文件问答助手...'
+            },
+            {
+                id: 9, name: '邮件智能撰写', icon: '✉️', color: '#fef3c7',
+                author: '郑十一 · 办公室', desc: '根据场景和收件人自动撰写专业商务邮件，支持多种语气和格式。',
+                tags: ['邮件', '写作', '效率'], category: 'text',
+                installs: 445, calls: 2340, rating: 4.5, status: 'published', version: 'v1.8.0',
+                prompt: '你是一名商务邮件撰写助手...'
+            }
+        ];
+
+        // Render Skills Grid
+        function renderSkillsGrid(containerId, skillList) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = skillList.map(skill => `
+                <div class="skill-card" onclick="openSkillDetail(${skill.id})" data-category="${skill.category}" data-name="${skill.name}">
+                    <div class="skill-card-header">
+                        <div class="skill-card-icon" style="background: ${skill.color};">${skill.icon}</div>
+                        <div>
+                            <div class="skill-card-title">${skill.name}</div>
+                            <div class="skill-card-author">${skill.author}</div>
+                        </div>
+                    </div>
+                    <div class="skill-card-desc">${skill.desc}</div>
+                    <div class="skill-card-tags">
+                        ${skill.tags.map(tag => `<span class="skill-tag">${tag}</span>`).join('')}
+                    </div>
+                    <div class="skill-card-footer">
+                        <div class="skill-stats">
+                            <span>📥 ${skill.installs}</span>
+                            <span>⭐ ${skill.rating}</span>
+                        </div>
+                        <button class="install-btn" onclick="event.stopPropagation(); installSkill(this, '${skill.name}')">安装</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Initialize
+        renderSkillsGrid('skillsGrid', skills);
+        renderSkillsGrid('mySkillsGrid', skills.slice(0, 4));
+
+        // Render chart bars
+        function renderChart() {
+            const chartData = [
+                { name: '邮件撰写', value: 445, color: '#3b82f6' },
+                { name: 'SQL生成', value: 412, color: '#8b5cf6' },
+                { name: '制度问答', value: 356, color: '#06b6d4' },
+                { name: '合同审查', value: 328, color: '#10b981' },
+                { name: '理财推荐', value: 298, color: '#f59e0b' },
+                { name: '投诉分析', value: 256, color: '#ef4444' },
+                { name: '报表解读', value: 234, color: '#ec4899' },
+                { name: '会议纪要', value: 189, color: '#6366f1' },
+                { name: '反洗钱', value: 167, color: '#14b8a6' },
+            ];
+            const max = Math.max(...chartData.map(d => d.value));
+            const container = document.getElementById('chartBars');
+            container.innerHTML = chartData.map(d => `
+                <div class="chart-bar-item">
+                    <span class="chart-bar-label">${d.name}</span>
+                    <div class="chart-bar-track">
+                        <div class="chart-bar-fill" style="width: ${(d.value/max)*100}%; background: ${d.color};">${d.value}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        renderChart();
+
+        // Page Switching
+        function switchPage(page) {
+            document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.header-nav-item').forEach(el => el.classList.remove('active'));
+            document.getElementById(`page-${page}`).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Tab Switching
+        function switchTab(el, tab) {
+            el.parentElement.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        // Filter Skills
+        function filterSkills() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = skills.filter(s => 
+                s.name.toLowerCase().includes(query) || 
+                s.desc.toLowerCase().includes(query) ||
+                s.tags.some(t => t.toLowerCase().includes(query))
+            );
+            renderSkillsGrid('skillsGrid', filtered);
+        }
+
+        // Filter by Category
+        function filterByCategory(el, category) {
+            document.querySelectorAll('.category-tag').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            if (category === 'all') {
+                renderSkillsGrid('skillsGrid', skills);
+            } else {
+                const filtered = skills.filter(s => s.category === category);
+                renderSkillsGrid('skillsGrid', filtered);
+            }
+        }
+
+        // Install Skill
+        function installSkill(btn, name) {
+            if (btn.classList.contains('installed')) {
+                btn.classList.remove('installed');
+                btn.textContent = '安装';
+                showToast('已卸载', `${name} 已从您的技能空间移除`);
+            } else {
+                btn.classList.add('installed');
+                btn.textContent = '已安装';
+                showToast('安装成功', `${name} 已添加到您的技能空间`);
+            }
+        }
+
+        // Install from Modal
+        function installFromModal() {
+            showToast('安装成功', '技能已添加到您的个人空间');
+            closeModal();
+        }
+
+        // Open Skill Detail
+        function openSkillDetail(id) {
+            const skill = skills.find(s => s.id === id);
+            if (!skill) return;
+            
+            document.getElementById('modalIcon').textContent = skill.icon;
+            document.getElementById('modalIcon').style.background = skill.color;
+            document.getElementById('modalTitle').textContent = skill.name;
+            document.getElementById('modalAuthor').textContent = skill.author;
+            document.getElementById('modalVersion').textContent = skill.version;
+            document.getElementById('modalInstalls').textContent = skill.installs;
+            document.getElementById('modalCalls').textContent = skill.calls;
+            document.getElementById('modalDesc').textContent = skill.desc;
+            
+            document.getElementById('skillDetailModal').classList.add('active');
+        }
+
+        // Close Modal
+        function closeModal() {
+            document.getElementById('skillDetailModal').classList.remove('active');
+        }
+
+        // Toast
+        function showToast(title, desc) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastTitle').textContent = title;
+            document.getElementById('toastDesc').textContent = desc;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // Approve/Reject Skill
+        function approveSkill(btn) {
+            const item = btn.closest('.review-item');
+            item.style.background = '#d1fae5';
+            item.style.opacity = '0.7';
+            setTimeout(() => item.remove(), 500);
+            showToast('审核通过', '技能已成功发布上线');
+        }
+
+        function rejectSkill(btn) {
+            const item = btn.closest('.review-item');
+            item.style.background = '#fee2e2';
+            item.style.opacity = '0.7';
+            setTimeout(() => item.remove(), 500);
+            showToast('已驳回', '已通知提交人修改后重新提交');
+        }
+
+        // Add Knowledge Reference
+        function addKnowledgeRef() {
+            const docs = [
+                '《建设银行员工行为守则》',
+                '《个人贷款管理办法》',
+                '《信息系统安全管理办法》',
+                '《客户信息保护规定》'
+            ];
+            const randomDoc = docs[Math.floor(Math.random() * docs.length)];
+            const container = document.getElementById('knowledgeRefs');
+            const ref = document.createElement('div');
+            ref.className = 'knowledge-ref';
+            ref.innerHTML = `
+                <span class="knowledge-ref-icon">📄</span>
+                <span class="knowledge-ref-text">${randomDoc}</span>
+                <span class="knowledge-ref-remove" onclick="this.parentElement.remove()">✕</span>
+            `;
+            container.appendChild(ref);
+        }
+
+        // Lab: Generate Skill
+        function generateSkill() {
+            const output = document.getElementById('labOutput');
+            output.innerHTML = '<span style="color: #10b981;">⚙️ AI正在生成技能初稿...</span><br><br>';
+            
+            const skillText = `# 客户投诉智能分析助手
+
+## System Prompt
+你是一名专业的银行客户投诉分析专家。请根据以下流程处理投诉工单：
+
+1. **问题分类**：识别投诉类型（服务/产品/系统/流程）
+2. **紧急程度**：评估优先级（紧急/重要/一般）
+3. **关键信息提取**：提取客户核心诉求
+4. **处理建议**：给出具体解决方案
+5. **话术推荐**：提供标准回复话术
+
+## 输入格式
+{
+  "complaint_text": "客户投诉文本内容",
+  "customer_level": "客户等级",
+  "product_type": "涉及产品类型"
+}
+
+## 输出格式
+{
+  "category": "问题分类",
+  "urgency": "紧急程度",
+  "key_issues": ["关键问题列表"],
+  "suggestions": ["处理建议"],
+  "response_template": "标准回复话术"
+}`;
+
+            let i = 0;
+            const interval = setInterval(() => {
+                if (i < skillText.length) {
+                    output.innerHTML = skillText.substring(0, i + 1) + '<span class="typing-cursor"></span>';
+                    i += 3;
+                } else {
+                    clearInterval(interval);
+                    output.innerHTML = skillText;
+                    document.getElementById('labScore').style.display = 'block';
+                    animateScore(78);
+                }
+            }, 20);
+        }
+
+        // Animate Score
+        function animateScore(target) {
+            const fill = document.getElementById('scoreFill');
+            const value = document.getElementById('scoreValue');
+            let current = 0;
+            const interval = setInterval(() => {
+                current += 2;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(interval);
+                }
+                fill.style.width = current + '%';
+                value.textContent = current;
+            }, 30);
+        }
+
+        // Iterate Skill
+        function iterateSkill() {
+            const history = document.getElementById('iterationHistory');
+            const newVersion = document.createElement('div');
+            newVersion.className = 'version-item';
+            const versions = history.querySelectorAll('.version-item');
+            const vNum = `v0.${versions.length + 1}`;
+            newVersion.innerHTML = `
+                <span class="version-num">${vNum}</span>
+                <span class="version-date">${new Date().toLocaleTimeString()}</span>
+                <div class="version-desc">基于反馈优化：增强输出格式规范性，补充边界条件处理</div>
+            `;
+            history.insertBefore(newVersion, history.firstChild);
+            
+            // Update score
+            const currentScore = parseInt(document.getElementById('scoreValue').textContent);
+            const newScore = Math.min(currentScore + Math.floor(Math.random() * 10) + 3, 98);
+            animateScore(newScore);
+            
+            showToast('迭代完成', `技能已更新至 ${vNum}，评分提升至 ${newScore}`);
+        }
+
+        // Close modal on overlay click
+        document.getElementById('skillDetailModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        // Keyboard shortcut
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeModal();
+        });
+    </script>
+</body>
+</html>
