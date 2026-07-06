@@ -86,3 +86,9 @@ CLAUDE.md
 
 # Local config file
 .mcp.json
+
+# Code intelligence (generated indexes)
+.codegraph/
+
+# Agent work tracking
+.sisyphus/
